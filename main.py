@@ -52,7 +52,7 @@ def destinySendKeys(text):
 
 
 # Auto Fill Button (abbreviated)
-def aFB(textEntry, status):
+def aFB(textEntry, status, shouldMarkLost):
     text = textEntry.get()
     textParts = text.split(",")
 
@@ -63,10 +63,10 @@ def aFB(textEntry, status):
                 setText(status, f"Status: Message Box - {messageText}")
 
                 if messageText in ["Item is already available."]:
-                    setText(status, "Status: Message Box - IGNORED")  # Can Skip Message Box
+                    setText(status, "Status: Message Box Ignored.")  # Can Skip Message Box
                     safeToIgnore = True
                 else:
-                    setText(status, "Status: STOPPED ON MESSAGE BOX")  # User Input Required
+                    setText(status, "Status: Stopped on Message Box!")  # User Input Required
                     safeToIgnore = False
 
                 if not safeToIgnore:
@@ -83,8 +83,27 @@ def aFB(textEntry, status):
         clickElement(chromeDriver.find_element(By.NAME, "go"))
 
         time.sleep(1)  # Constant sleep time to avoid spamming
-        while not chromeDriver.execute_script("return document.readyState == 'complete'"):
-            time.sleep(0.1)  # Additional delay to account for server / networking issues
+
+        if shouldMarkLost:
+            try:
+                clickElement(chromeDriver.find_element(By.NAME, "markLost"))
+                setText(status, f"Status: Marking {part} lost.")
+            except NoSuchElementException:
+                setText(status, f"Status: No Mark Lost Button on {part}!")
+                textEntry.delete(0, tk.END)
+                textEntry.insert(0, ", ".join(textParts[i:len(textParts)]))
+
+            time.sleep(1)
+
+            try:
+                clickElement(chromeDriver.find_element(By.NAME, "markLostOK"))
+                setText(status, f"Status: Confirming {part} is lost.")
+            except NoSuchElementException:
+                setText(status, f"Status: No Mark Lost conformation for {part}!")
+                textEntry.delete(0, tk.END)
+                textEntry.insert(0, ", ".join(textParts[i:len(textParts)]))
+
+            time.sleep(1)
 
     setText(status, "Status: Auto Fill Done")
 
@@ -107,7 +126,7 @@ def initGui():
     root = tk.Tk()
 
     # INFO BAR
-    tk.Label(root, text="Destiny Helper v0.0.2").pack()
+    tk.Label(root, text="Destiny Helper v0.0.3").pack()
 
     # NAVIGATION
 
@@ -141,7 +160,11 @@ def initGui():
     autoFillEntry = tk.Entry(root, width=40)
     autoFillEntry.pack()
 
-    tk.Button(root, text="Auto-Fill", command=lambda: aFB(autoFillEntry, autoFillStatus)).pack()
+    bulkLostBool = tk.BooleanVar()
+    bulkLost = tk.Checkbutton(root, text="Mark Lost?", var=bulkLostBool)
+    bulkLost.pack()
+
+    tk.Button(root, text="Auto-Fill", command=lambda: aFB(autoFillEntry, autoFillStatus, bulkLostBool.get())).pack()
 
     return root
 
