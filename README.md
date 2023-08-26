@@ -2,7 +2,8 @@
 
 ### Features:
 - Auto Fill Check-in and Check-out forms,
-- Automatically process HP Chromebook / ProBook data matrices (fills in only the serial number)
+- Automatically process HP Device data matrices - fills in the serial number,
+- Automatically mark devices as lost
 
 ### How To Use:
 - Download Python 3.11
