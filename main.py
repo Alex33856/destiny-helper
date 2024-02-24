@@ -4,7 +4,9 @@ from tkinter import ttk
 
 from selenium.common import NoSuchElementException
 from selenium.webdriver import Chrome
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 
 import config
 
@@ -13,11 +15,9 @@ guiRoot: tk
 
 
 def initDriver() -> Chrome:
-    # driverManager = ChromeDriverManager()
-    # driverPath = driverManager.install()
-    # driverService = ChromeOptions()
-    # options = Options()
-    driver = Chrome()  # options=options, service=driverService
+    driverManager = ChromeDriverManager()
+    driverPath = driverManager.install()
+    driver = Chrome(service=ChromeService(driverPath))
     return driver
 
 
