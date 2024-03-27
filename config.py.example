@@ -1,2 +1,5 @@
-DESTINY_URL = "Destiny URL Here"
-DESTINY_URL_LOGIN = "Destiny Login Page URL Here"
+DESTINY_HOME_URL = "Destiny Home Page URL"  # Automatically opened on start.
+DESTINY_BACK_OFFICE_URL = "Destiny Back Office URL"  # Opened when 'Home' button is pressed.
+DESTINY_LOGIN_BUTTON_ID = "Destiny Home Page Login Button ID"  # Leave empty to not automatically press.
+LIBRARY_MANAGER_IFRAME_ID = "Destiny Back Office Page Library Manager iFrame ID"
+SAFE_MESSAGE_ALERTS = ["Item is already available."]  # List of message box errors that can be safely ignored.

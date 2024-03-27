@@ -1,5 +1,7 @@
 # Destiny Helper
 
+#### v0.0.4 and after support the new Destiny Portal update.
+
 ### Features:
 - Auto Fill Check-in and Check-out forms,
 - Automatically process HP Device data matrices - fills in the serial number,

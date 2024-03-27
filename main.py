@@ -27,14 +27,14 @@ def clickElement(element):
 
 def homeButton():
     if chromeDriver:
-        chromeDriver.get(config.DESTINY_URL)
+        chromeDriver.get(config.DESTINY_BACK_OFFICE_URL)
 
 
 def closeButton():
     if chromeDriver:
         chromeDriver.close()
 
-    exit(0)
+    guiRoot.destroy()
 
 
 def setText(guiElement, text):
@@ -43,11 +43,43 @@ def setText(guiElement, text):
     guiRoot.update()
 
 
+def findElement(by, value):
+    try:
+        return chromeDriver.find_element(by, value)
+    except NoSuchElementException:
+        return None
+
+
+def openPopup(message):
+    popup = tk.Tk()
+    popup.wm_title("An Error Occurred!")
+
+    label = ttk.Label(popup, text=message)
+    label.pack(side="top")
+
+    button = ttk.Button(popup, text="Okay", command=popup.destroy)
+    button.pack()
+
+    popup.after(1, popup.focus_force)
+    popup.after(1, popup.bell)
+    popup.mainloop()
+
+
+def switchToIFrame():
+    chromeDriver.switch_to.default_content()
+
+    iframe = findElement(By.ID, config.LIBRARY_MANAGER_IFRAME_ID)
+    if iframe:
+        chromeDriver.switch_to.frame(iframe)
+    else:
+        openPopup("Failed to find Library Manager iFrame!")
+
+
 def destinySendKeys(text):
     try:
-        inputBox = chromeDriver.find_element(By.NAME, "searchString")
+        inputBox = findElement(By.NAME, "searchString")
     except NoSuchElementException:
-        inputBox = chromeDriver.find_element(By.NAME, "barcode")
+        inputBox = findElement(By.NAME, "barcode")
     inputBox.send_keys(text)
 
 
@@ -56,6 +88,7 @@ def aFB(textEntry, status, shouldMarkLost):
     text = textEntry.get()
     textParts = text.split(",")
 
+    switchToIFrame()
     for i, part in enumerate(textParts):
         try:
             if (messageBox := chromeDriver.find_element(By.ID, "messageBox")) is not None:
@@ -67,6 +100,7 @@ def aFB(textEntry, status, shouldMarkLost):
                     safeToIgnore = True
                 else:
                     setText(status, "Status: Stopped on Message Box!")  # User Input Required
+                    openPopup("Stopped on a message box!\nClear it and rerun Auto Fill to continue.")
                     safeToIgnore = False
 
                 if not safeToIgnore:
@@ -114,6 +148,7 @@ def processMatrix(entry, status):
 
     setText(status, f"Status: Sending Barcode {serialNumber}")
 
+    switchToIFrame()
     destinySendKeys(serialNumber)
     clickElement(chromeDriver.find_element(By.NAME, "go"))
 
@@ -126,7 +161,7 @@ def initGui():
     root = tk.Tk()
 
     # INFO BAR
-    tk.Label(root, text="Destiny Helper v0.0.3").pack()
+    tk.Label(root, text="Destiny Helper v0.0.4").pack()
 
     # NAVIGATION
 
@@ -174,13 +209,16 @@ def Main():
 
     chromeDriver = initDriver()
     chromeDriver.set_window_size(900, 700)
-    chromeDriver.get(config.DESTINY_URL_LOGIN)
-    clickElement(chromeDriver.find_element(By.ID, "Login"))
+    chromeDriver.get(config.DESTINY_HOME_URL)
+
+    if config.DESTINY_LOGIN_BUTTON_ID != "":
+        time.sleep(3)
+        clickElement(chromeDriver.find_element(By.ID, config.DESTINY_LOGIN_BUTTON_ID))
 
     guiRoot = initGui()
     guiRoot.winfo_toplevel().wm_title("Destiny Helper")
 
-    guiRoot.focus_force()
+    guiRoot.after(1, guiRoot.focus_force)
     guiRoot.mainloop()
 
 
